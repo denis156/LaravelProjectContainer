@@ -1,0 +1,2 @@
+#!/bin/bash
+cd "/Users/denisdjadianardika/Sites/Skripsi/LaravelProjectContainer" && ./Terminal/domain.sh "$@"

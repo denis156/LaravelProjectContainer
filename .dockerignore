@@ -1,0 +1,115 @@
+# ===============================================
+# LaravelProjectContainer .dockerignore  
+# Created by Denis Djodian Ardika - Artelia.Dev
+# ===============================================
+
+# ===== GIT & VERSION CONTROL =====
+.git
+.gitignore
+.gitattributes
+.github/
+
+# ===== DOCUMENTATION =====
+# Skip docs during build untuk faster builds
+README.md
+*/doc_*.md
+CHANGELOG.md
+LICENSE
+*.md
+
+# ===== NODE.JS & NPM =====
+# Skip node modules dari host
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+
+# ===== DEVELOPMENT FILES =====
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# OS files  
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ===== DOCKER FILES =====
+# Docker files (no need inside container)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# ===== LOGS & CACHE =====
+# Host logs
+*.log
+logs/
+/var/log/
+
+# Cache files
+.cache/
+*.cache
+.php_cs.cache
+
+# ===== BACKUPS =====
+# Backup files
+*.sql
+*.sql.gz
+*.dump
+*.tar.gz
+*.zip
+/backups/
+
+# ===== RUNTIME DATA =====
+# Runtime generated data  
+/data/
+/tmp/
+*.pid
+*.lock
+
+# ===== PROJECTS VENDOR/NODE_MODULES =====
+# Laravel projects dependencies (will be installed inside container)
+Projects/*/vendor/
+Projects/*/node_modules/
+Projects/*/storage/logs/
+Projects/*/storage/framework/cache/
+Projects/*/storage/framework/sessions/
+Projects/*/storage/framework/views/
+Projects/*/bootstrap/cache/
+
+# ===== ENVIRONMENT & SECRETS =====
+# Environment files (will be mounted as volumes)
+.env*
+*.key
+*.pem
+
+# ===== GENERATED CONFIGS =====
+# Auto-generated supervisor configs
+Supervisor/projects/*.conf
+
+# ===== SSL & CERTIFICATES =====
+# SSL data (will be volumes)
+caddy_data/
+caddy_config/
+/ssl/
+/certs/
+*.crt
+*.cert
+
+# ===== TESTING & COVERAGE =====
+# Test results
+/coverage/
+phpunit.xml
+.phpunit.result.cache
+/tests/
+
+# ===== IMAGE OPTIMIZATIONS =====
+# Include only essential images
+image/*.jpg
+image/*.jpeg  
+# Keep PNG logos
+!image/*.png

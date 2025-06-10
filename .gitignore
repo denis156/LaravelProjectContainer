@@ -1,0 +1,177 @@
+# ===============================================
+# LaravelProjectContainer .gitignore
+# Created by Denis Djodian Ardika - Artelia.Dev
+# ===============================================
+
+# ===== ENVIRONMENT & SECRETS =====
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# ===== DOCKER VOLUMES & DATA =====
+# Docker generated data
+/data/
+/mysql-data/
+/redis-data/
+/postgres-data/
+/minio-data/
+
+# Container runtime files
+/logs/
+/tmp/
+
+# ===== PROJECTS FOLDER =====
+# Laravel projects (optional - bisa di-include jika mau commit projects)
+/Projects/*
+!/Projects/README.md
+!/Projects/doc_projects.md
+
+# Project-specific files
+Projects/*/vendor/
+Projects/*/node_modules/
+Projects/*/storage/logs/*.log
+Projects/*/storage/framework/cache/
+Projects/*/storage/framework/sessions/
+Projects/*/storage/framework/views/
+Projects/*/.env
+Projects/*/.env.backup
+Projects/*/public/hot
+Projects/*/public/storage
+Projects/*/bootstrap/cache/*.php
+
+# ===== SUPERVISOR GENERATED CONFIGS =====
+# Auto-generated project configs
+/Supervisor/projects/*.conf
+!/Supervisor/projects/.gitkeep
+
+# ===== TERMINAL RUNTIME FILES =====
+# Current project tracking
+Terminal/current_project
+Terminal/domains.conf
+Terminal/*.pid
+Terminal/*.lock
+
+# ===== BACKUPS =====
+# Database backups
+/backups/
+*.sql
+*.sql.gz
+*.dump
+
+# Project backups
+*.tar.gz
+*.zip
+
+# ===== LOGS =====
+# Container logs
+*.log
+/var/log/
+storage/logs/
+logs/
+
+# Supervisor logs
+supervisord.log
+supervisord.pid
+
+# ===== CERTIFICATES & SSL =====
+# SSL certificates
+*.crt
+*.cert
+*.ca-bundle
+/ssl/
+/certs/
+caddy_data/
+caddy_config/
+
+# ===== CACHE & TEMPORARY FILES =====
+# PHP cache
+*.cache
+.php_cs.cache
+.phpunit.result.cache
+
+# Composer cache
+.composer/
+
+# NPM cache
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== IDE & EDITOR FILES =====
+# VSCode
+.vscode/
+*.code-workspace
+
+# PhpStorm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# ===== OPERATING SYSTEM FILES =====
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ===== DEVELOPMENT TOOLS =====
+# Testing
+/coverage/
+phpunit.xml
+.phpunit.result.cache
+
+# Profiling
+*.prof
+xdebug.log
+
+# ===== CUSTOM OVERRIDES =====
+# Local development overrides
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Custom scripts
+/scripts/local/
+/bin/local/
+
+# ===== ARTELIA.DEV SPECIFIC =====
+# Development notes
+NOTES.md
+TODO.md
+DEVELOPMENT.md
+
+# Local configurations
+local.conf
+dev.conf
