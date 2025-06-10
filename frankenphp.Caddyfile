@@ -1,0 +1,332 @@
+# Global options untuk FrankenPHP
+{
+    # Enable FrankenPHP
+    frankenphp
+    
+    # Set order untuk directive
+    order php_server before file_server
+    
+    # Auto HTTPS untuk production
+    auto_https disable_redirects
+    
+    # Global debugging (disable untuk production)
+    debug
+    
+    # Log configuration
+    log {
+        output file /var/log/caddy/access.log
+        format json
+        level INFO
+    }
+    
+    # Error log
+    log {
+        output file /var/log/caddy/error.log
+        format json
+        level ERROR
+    }
+}
+
+# Default site - Landing page untuk container info
+:80 {
+    root * /var/www/html/public
+    
+    # Enable PHP processing
+    php_server
+    
+    # Handle Laravel routing
+    try_files {path} {path}/ /index.php?{query}
+    
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+    
+    # Gzip compression
+    encode gzip
+    
+    # Static file caching
+    @static {
+        file
+        path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.woff *.woff2 *.ttf *.eot *.svg
+    }
+    handle @static {
+        header Cache-Control "public, max-age=31536000"
+    }
+    
+    # Logging
+    log {
+        output file /var/log/laravel/access.log
+        format json
+    }
+}
+
+# HTTPS version
+:443 {
+    root * /var/www/html/public
+    
+    # Enable TLS
+    tls internal
+    
+    # Enable PHP processing
+    php_server
+    
+    # Handle Laravel routing
+    try_files {path} {path}/ /index.php?{query}
+    
+    # Security headers (enhanced for HTTPS)
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+    
+    # Gzip compression
+    encode gzip
+    
+    # Static file caching
+    @static {
+        file
+        path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.woff *.woff2 *.ttf *.eot *.svg
+    }
+    handle @static {
+        header Cache-Control "public, max-age=31536000"
+    }
+    
+    # Logging
+    log {
+        output file /var/log/laravel/access_https.log
+        format json
+    }
+}
+
+# Development ports - untuk multiple projects
+:8000 {
+    root * /var/www/html/projects/{env.PROJECT_8000}/public
+    
+    # Enable PHP processing
+    php_server
+    
+    # Handle Laravel routing
+    try_files {path} {path}/ /index.php?{query}
+    
+    # CORS untuk development
+    header {
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+    
+    # Handle preflight requests
+    @options {
+        method OPTIONS
+    }
+    handle @options {
+        respond 200
+    }
+    
+    # Gzip compression
+    encode gzip
+    
+    # Logging untuk development
+    log {
+        output file /var/log/laravel/dev_8000.log
+        format json
+    }
+}
+
+:8001 {
+    root * /var/www/html/projects/{env.PROJECT_8001}/public
+    
+    # Enable PHP processing
+    php_server
+    
+    # Handle Laravel routing
+    try_files {path} {path}/ /index.php?{query}
+    
+    # CORS untuk development
+    header {
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+    
+    # Handle preflight requests
+    @options {
+        method OPTIONS
+    }
+    handle @options {
+        respond 200
+    }
+    
+    # Gzip compression
+    encode gzip
+    
+    # Logging untuk development
+    log {
+        output file /var/log/laravel/dev_8001.log
+        format json
+    }
+}
+
+:8002 {
+    root * /var/www/html/projects/{env.PROJECT_8002}/public
+    
+    # Enable PHP processing
+    php_server
+    
+    # Handle Laravel routing
+    try_files {path} {path}/ /index.php?{query}
+    
+    # CORS untuk development
+    header {
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+    
+    # Handle preflight requests
+    @options {
+        method OPTIONS
+    }
+    handle @options {
+        respond 200
+    }
+    
+    # Gzip compression
+    encode gzip
+    
+    # Logging untuk development
+    log {
+        output file /var/log/laravel/dev_8002.log
+        format json
+    }
+}
+
+:8003 {
+    root * /var/www/html/projects/{env.PROJECT_8003}/public
+    
+    # Enable PHP processing
+    php_server
+    
+    # Handle Laravel routing
+    try_files {path} {path}/ /index.php?{query}
+    
+    # CORS untuk development
+    header {
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+    
+    # Handle preflight requests
+    @options {
+        method OPTIONS
+    }
+    handle @options {
+        respond 200
+    }
+    
+    # Gzip compression
+    encode gzip
+    
+    # Logging untuk development
+    log {
+        output file /var/log/laravel/dev_8003.log
+        format json
+    }
+}
+
+# Production domain handling - akan dikonfigurasi via domain.sh script
+# Format: domain.com, www.domain.com
+(production_domain) {
+    # Auto HTTPS untuk production
+    tls {
+        protocols tls1.2 tls1.3
+    }
+    
+    # PHP processing
+    php_server
+    
+    # Handle Laravel routing
+    try_files {path} {path}/ /index.php?{query}
+    
+    # Security headers untuk production
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+    }
+    
+    # Performance optimizations
+    encode gzip br
+    
+    # Static file caching dengan versioning
+    @static {
+        file
+        path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.woff *.woff2 *.ttf *.eot *.svg *.webp
+    }
+    handle @static {
+        header Cache-Control "public, max-age=31536000, immutable"
+        header Vary "Accept-Encoding"
+    }
+    
+    # HTML caching
+    @html {
+        file
+        path *.html
+    }
+    handle @html {
+        header Cache-Control "public, max-age=300"
+    }
+    
+    # Rate limiting untuk production
+    rate_limit {
+        zone production {
+            key {remote_host}
+            events 100
+            window 1m
+        }
+    }
+    
+    # Production logging
+    log {
+        output file /var/log/laravel/production.log
+        format json
+        level WARN
+    }
+}
+
+# Maintenance mode snippet
+(maintenance) {
+    respond "Situs sedang dalam maintenance. Silakan kembali lagi nanti." 503 {
+        close
+    }
+}
+
+# Error handling
+handle_errors {
+    @404 {
+        expression {http.error.status_code} == 404
+    }
+    handle @404 {
+        rewrite * /404.html
+        file_server
+    }
+    
+    @5xx {
+        expression {http.error.status_code} >= 500
+    }
+    handle @5xx {
+        rewrite * /500.html
+        file_server
+    }
+}

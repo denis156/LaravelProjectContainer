@@ -1,0 +1,224 @@
+services:
+  # ===============================================
+  # FrankenPHP Service - Laravel Application Server
+  # ===============================================
+  frankenphp:
+    container_name: laravel_frankenphp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+      - "8001:8001" 
+      - "8002:8002"
+      - "8003:8003"
+      - "8004:8004"
+      - "8005:8005"
+      - "8006:8006"
+      - "8007:8007"
+      - "8008:8008"
+      - "8009:8009"
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./Projects:/var/www/html/Projects:rw
+      - ./Terminal:/var/www/html/Terminal:rw
+      - ./Supervisor:/etc/supervisor/conf.d:rw
+      - ./frankenphp.Caddyfile:/etc/caddy/Caddyfile:ro
+      - frankenphp_data:/data
+      - frankenphp_config:/config
+    environment:
+      # Laravel Environment
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - APP_KEY=${APP_KEY}
+      
+      # Database Connection
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-laravel}
+      - DB_USERNAME=${DB_USERNAME:-laravel}
+      - DB_PASSWORD=${DB_PASSWORD:-laravel}
+      
+      # Redis Connection  
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PORT=6379
+      
+      # Cache & Queue
+      - CACHE_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+      - SESSION_DRIVER=redis
+      
+      # Performance Settings
+      - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT:-512M}
+      - PHP_MAX_EXECUTION_TIME=${PHP_MAX_EXECUTION_TIME:-300}
+      - PHP_UPLOAD_MAX_FILESIZE=${PHP_UPLOAD_MAX_FILESIZE:-100M}
+      
+      # Development Settings
+      - XDEBUG_MODE=${XDEBUG_MODE:-debug}
+      - ENABLE_OPCACHE=${ENABLE_OPCACHE:-true}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - laravel_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ===============================================
+  # MySQL Database Service
+  # ===============================================
+  mysql:
+    container_name: laravel_mysql
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-secret_root_password}
+      - MYSQL_DATABASE=${DB_DATABASE:-laravel}
+      - MYSQL_USER=${DB_USERNAME:-laravel}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-laravel}
+      - MYSQL_CHARSET=utf8mb4
+      - MYSQL_COLLATION=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./Database/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - laravel_network
+    restart: unless-stopped
+    command: [
+      '--default-authentication-plugin=mysql_native_password',
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci',
+      '--innodb-buffer-pool-size=256M',
+      '--innodb-log-file-size=64M',
+      '--max-allowed-packet=64M',
+      '--max-connections=200'
+    ]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-secret_root_password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ===============================================
+  # Redis Cache & Session Service  
+  # ===============================================
+  redis:
+    container_name: laravel_redis
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - laravel_network
+    restart: unless-stopped
+    command: [
+      "redis-server",
+      "--appendonly", "yes",
+      "--maxmemory", "256mb",
+      "--maxmemory-policy", "allkeys-lru",
+      "--save", "900", "1",
+      "--save", "300", "10",
+      "--save", "60", "10000"
+    ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # ===============================================
+  # phpMyAdmin - Database Management (Optional)
+  # ===============================================
+  phpmyadmin:
+    container_name: laravel_phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=${DB_ROOT_PASSWORD:-secret_root_password}
+      - UPLOAD_LIMIT=100M
+      - MEMORY_LIMIT=512M
+      - MAX_EXECUTION_TIME=300
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - laravel_network
+    restart: unless-stopped
+    profiles: ["admin"]
+
+  # ===============================================
+  # MailHog - Email Testing (Development)
+  # ===============================================
+  mailhog:
+    container_name: laravel_mailhog
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - laravel_network
+    restart: unless-stopped
+    profiles: ["dev"]
+
+  # ===============================================
+  # MinIO - S3 Compatible Storage (Optional)
+  # ===============================================
+  minio:
+    container_name: laravel_minio
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"   # API
+      - "9001:9001"   # Console
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin123}
+    volumes:
+      - minio_data:/data
+    networks:
+      - laravel_network
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    profiles: ["storage"]
+
+# ===============================================
+# Docker Networks
+# ===============================================
+networks:
+  laravel_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ===============================================
+# Docker Volumes
+# ===============================================
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  frankenphp_data:
+    driver: local
+  frankenphp_config:
+    driver: local
+  minio_data:
+    driver: local
